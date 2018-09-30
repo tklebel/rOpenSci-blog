@@ -368,7 +368,7 @@ must be defined in a sourced file, otherwise the output will not be as
 informative, because profvis will not be able to access the functions' source
 code.
 
-```{r}
+```{r, eval=FALSE}
 profvis::profvis({
   
   old_approach <- function(authors) {
@@ -383,12 +383,14 @@ profvis::profvis({
 })
 ```
 
+![](screenshots/old_version.png)
+
 We can see that the call to `tidyr::unnest` takes up a lot of time, thus
 it would be good to get rid of it. The new approach does not need unnesting, and
 is roughly 17 times faster:
 
 
-```{r}
+```{r, eval=FALSE}
 profvis::profvis({
 
   new_approach <- function(authors) {
@@ -400,6 +402,7 @@ profvis::profvis({
   purrr::rerun(500, new_approach(authors))})
 ```
 
+![](screenshots/new_version.png)
 
 By assessing the efficiency of functions repeatedly and optimising several
 parts,
