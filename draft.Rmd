@@ -1,7 +1,7 @@
 ---
 title: 'jstor: Parsing XML - Lessons From Writing a Package'
 author: "Thomas Klebel"
-date: "25 9 2018"
+date: "30 9 2018"
 output: html_document
 ---
 
@@ -18,12 +18,29 @@ half. It is a story about learning how to parse XML efficiently and creating a
 piece of software that others will find useful. The story has many twists, and
 I would like to take you with me -- on a journey that has told me many lessons.
 
+Before taking on the look back into the past, I want to give you some basic
+information. JSTOR is a large archive for scientific texts, mainly known for 
+their coverage of journal articles, although they recently added book chapters
+and other sources as well. They make all of their content available for 
+researchers to do text mining, citation analysis, and everything else you could
+come up using metadata and data about the content of the articles. The package
+I wrote, `jstor`, provides functions to import the metadata, and it has a few
+helper functions for common cleaning tasks. Everything you need to know about 
+how to use it is on the [package website](https://ropensci.github.io/jstor/).
+You will find three vignettes, with a general introduction, examples on how to
+import many files at once, and a few examples of known quirks of JSTORs data.
+There is also a lengthy case study that also shows how to combine metadata and
+data about the content of the articles. But for now let us turn back the clock
+to follow along my journey of developing the package.
+
 # Step 1: Hacking Away
-Back in March 2017, I was starting out as a student in a research project
+Back in March 2017, I was starting out as a MA-student of
+sociology in a research project
 concerned with the scientific elite within sociology and economics. The project
-had many goals, but writing an R package was not one of them. At the beginning,
+had many goals, but writing an R package was not one of them. At the beginning
+of my engagement,
 I was presented with a dataset which was huge, at least for my terms: 
-around 30GB of data, half of which was text, the other half 500,000 .xml-files.
+around 30GB of data, half of which was text, the other half 500,000 `.xml`-files.
 The dataset was incredible in its depth: we basically sat on all articles
 from JSTOR which belonged to the topics "sociology" and "economics". To repeat:
 all articles that JSTOR has on those topics for all years.
@@ -95,15 +112,24 @@ find_meta <- function(meta_list) {
 The function would have been applied like so:
 
 ```r
+# one file
 file_path %>% 
   read_xml() %>% 
   as_list() %>% 
   find_meta()
+  
+# many files
+file_paths %>% 
+  map(read_xml) %>% 
+  map(as_list) %>% 
+  map(find_meta)
 ```
+
+
 
 As can be expected when parsing deeply nested lists which do not always have
 the same structure, this quickly escalated into
-more and more complex or sometimes quite ridicoulus functions like:
+more and more complex and sometimes quite ridicoulus functions:
 
 ```r
 extract_name <- function(x) {
@@ -122,17 +148,19 @@ happy.
 At some point though, I started benchmarking my solutions. I tried out 
 `mclapply` and it doubled the speed of execution on my machine, but it was still
 very slow: Parsing the content *after* importing and transforming it into a list
-would take 7.2 seconds for 3000 files. For 200,000 files of sociological 
+took 7.2 seconds for 3000 files. For 200,000 files of sociological 
 articles this would amount to `r 7.2*200000/3000/60` hours. And importing and
-converting to a list took a lot of time too. Although I didn't thought, I would
-need to import the files many times (which I had to do later to update results
+converting to a list took a lot of time too. Although I didn't think at that 
+time, that I would
+need to import the files more than once or at most twice
+(which I had to do later to update results
 after we got new versions with better data), I decided that this was too slow,
 and I looked for options. 
 
 The first idea which I had was simply to scale computing power: I had a faster
-machine at home, and planned to read the data into R at work, save it as .rds,
+machine at home, and planned to read the data into R at work, save it as `.rds`,
 and then process it at home on the faster machine (for some reason I didn't want
-to carry the original data home). Apperently, this is not as easy as it sounds.
+to carry the original data home). Apparently, this is not as easy as it sounds.
 If you parse a file with `xml2::read_xml()` you don't get the content of the
 file, but only an object that points to the file, and you can then extract 
 content with `xml_child()` and other functions.
@@ -151,12 +179,12 @@ function before re-writing to using XPATH expressions, and the function today.
 The current version is a lot safer and handles many edge-cases, but it is still
 around 5 times faster. Furthermore, it depends less on how complex the original
 file is, and more on how much information is being read. With the new version
-of the function, around 30% of the runtime is spent on reading the file, while 
+of the function, around 30% of the time is spent on reading the file, while 
 with the old version it was around 85% of the time.
 
 ```{r, cache=TRUE, message=FALSE, }
 microbenchmark::microbenchmark(
-    convert = jst_example("sample_with_references.xml") %>% 
+  convert = jst_example("sample_with_references.xml") %>% 
     read_xml() %>% 
     as_list(),
     
@@ -165,7 +193,7 @@ microbenchmark::microbenchmark(
     as_list() %>% 
     find_meta(),
   
-    new = jst_get_article(jst_example("sample_with_references.xml"))
+  new = jst_get_article(jst_example("sample_with_references.xml"))
 )
 ```
 
@@ -187,8 +215,8 @@ to make sure everything works as expected. This helped a lot for re-structuring
 the code, since I already knew what my output should look like, and I only had 
 to change the steps in between.
 
-The work on re-writing progressed quickly. The first step was to simply extract the
-identifier for the journal within the article it was published:
+The work on re-writing progressed quickly. The first step was to simply extract
+the identifier for the journal within which the article was published:
 
 ```r
 find_meta <- function(xml_file) {
@@ -218,7 +246,10 @@ to learn how to navigate within the document via XPATH.
 Another thing I took up
 during this re-write was regularly benchmarking my functions. Since I lacked 
 (and still lack) the technical expertise to know which approach would be faster,
-I had to benchmark possibilities to figure it out:
+I had to benchmark possibilities to figure it out. The following benchmark 
+compares three versions of extracting the text from the node named `volume`.
+Especially the first two seemed very similar to me and it was not at all 
+obvious, which one would be faster.
 
 ```r
 fun1 <- function() xml_find_all(test_file, "//volume/.//text()") %>% as.character()
@@ -238,8 +269,10 @@ microbenchmark::microbenchmark(fun1(), fun2(), fun3(), times = 1000)
 # fun3() 686.542 725.0925 822.2103 763.4240 798.1155 3534.849  1000
 ```
 Although the unit is microseconds here, the difference between `fun2` and 
-`fun3` is quite substantial, if you want to do it 500,000 times: 4.5 minutes. 
-I'd guess that `fun2` is faster, since it only calls two functions, and not 
+`fun3` is quite substantial, if you want to do it 500,000 times: 4.5 minutes. If
+you have to extract elements often (which I was doing), than this quickly adds 
+up. What is the reason for this big difference?
+I'd guess that `fun2` is fastest since it only calls two functions, and not 
 four, and because `xml_text()` probably converts the content directly to 
 character in C++, which is faster than calling `as.character` afterwards. But
 I am still a *social* scientist, so I wouldn't bet on that explanation.
@@ -247,12 +280,15 @@ I am still a *social* scientist, so I wouldn't bet on that explanation.
 
 After rewriting and expanding the functionality, I was still not happy, however,
 since the code was slower than I thought it should be. At this point,
-I dug deeper again, using the package `profvis` to find bottlenecks. Oddly
+I dug deeper again, using the package
+[profvis](https://rstudio.github.io/profvis/) to find bottlenecks. Oddly
 enough, I had introduced a bottleneck right at the beginning: I was using
 `data_frame` (which is equivalent to `tibble()`) to create the object my 
 function would return. Unfortunately, `tibble` (and `data.frame` as well) are
 quite complex functions. They do type
-checking and other things, and if you do this repeatedly, it quickly adds up.
+checking and other things, and if you do this repeatedly, it quickly adds up and
+is not very smart in general, since I know exactly what kind of data to expect
+(if I wrote the rest of my functions appropriately).
 
 You can see the difference yourself:
 ```{r}
@@ -288,7 +324,7 @@ old_approach <- function() {
 # this is obviously a lot simpler
 new_approach <- function() {
   data.frame(id = "1",
-         authors = get_authors())
+             authors = get_authors())
 }
 
 
@@ -301,12 +337,6 @@ microbenchmark::microbenchmark(
 
 The difference is significant, amounting to around 40 minutes more for
 500,000 documents, if I would have kept the old version.
-
-
-But how did I find the functions responsible for the delay? I used the package
-[profvis](https://rstudio.github.io/profvis/index.html)
-a lot during this progress. The package measures time spent line by
-line, which let's you identify bottlenecks in your code.
 
 Unfortunately, using profvis for
 such small and fast functions does not work well out of the box:
@@ -321,10 +351,11 @@ profvis::profvis({
 ```
 
 A simple solution is to rerun the function many times. Note, however, that this
-may lead to varying results. The function is not measured 500 times, the result
+does not increase realiabity and reproducibility of the results. The function is
+not measured 500 times, the result
 being the mean or median (like in `microbenchmark`), but it is simply the 
 aggregate of running the function 500 times. This can vary quite a bit. All in
-all, tough, I found it still useful to judge, if any part of the code is orders 
+all, tough, I found it still useful to judge if any part of the code is orders 
 of magnitude slower than the rest.
 
 In the following chunk
@@ -337,52 +368,49 @@ code.
 
 ```{r}
 profvis::profvis({
-  old_approach <- function() {
-    authors <- get_authors()
-    
+  
+  old_approach <- function(authors) {
     res <- tibble::data_frame(id = "1",
                               authors = list(authors))
     
     tidyr::unnest(res, authors)
   }
 
-  
-  purrr::rerun(500, old_approach())
+  authors <- get_authors()
+  purrr::rerun(500, old_approach(authors))
 })
 ```
 
 We can see that the call to `tidyr::unnest` takes up a lot of time, thus
 it would be good to get rid of it. The new approach does not need unnesting, and
-is around three times faster:
+is roughly 17 times faster:
 
 
 ```{r}
 profvis::profvis({
 
-  new_approach <- function() {
-    authors <- get_authors()
-    
+  new_approach <- function(authors) {
     data.frame(id = "1",
                authors = authors)
   }
   
-  purrr::rerun(500, new_approach())
-})
+  authors <- get_authors()
+  purrr::rerun(500, new_approach(authors))})
 ```
 
 
-By assessing the efficiency of functions repeatedly and optimising several parts,
+By assessing the efficiency of functions repeatedly and optimising several
+parts,
 I was able to trim down execution time considerably overall. For 25,000 files,
 which is the maximum amount of files you can receive at one time through the
-interface of JSTOR/DfR, execution time is slightly under 4 minutes, or 2 minutes
-if executed in parallel, at least on my moderately fast MacBook Pro.
+standard interface of JSTOR/DfR, execution time is slightly under 4 minutes, or
+2 minutes if executed in parallel, at least on my moderately fast MacBook Pro.
 
 
-# Lesson learned: 
+# Lessons learned: 
 
 - community is important
-
-# Lesson four: what could I have done differently?
+- what could I have done differently?
 Decision for API: each function is self-contained. If I had extracted the parts
 for import somehow, it would be faster to apply different functions (like for
 metada and references and other stuff).
