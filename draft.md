@@ -14,8 +14,8 @@ half. It is a story about learning how to parse XML efficiently and creating a
 piece of software that others will find useful. The story has many twists, and
 I would like to take you with me – on a journey that has told me many lessons.
 
-Before taking on the look back into the past, I want to give you some basic
-information. JSTOR is a large archive for scientific texts, mainly known for 
+Before taking a look in the past, I want to give you some basic
+information: JSTOR is a large archive for scientific texts, mainly known for 
 their coverage of journal articles, although they recently added book chapters
 and other sources as well. They make all of their content available for 
 researchers to do text mining, citation analysis, and everything else you could
@@ -25,8 +25,8 @@ helper functions for common cleaning tasks. Everything you need to know about
 how to use it is on the [package website](https://ropensci.github.io/jstor/).
 You will find three vignettes, with a general introduction, examples on how to
 import many files at once, and a few examples of known quirks of JSTORs data.
-There is also a lengthy case study that also shows how to combine metadata and
-data about the content of the articles. But for now let us turn back the clock
+There is also a lengthy case study that shows how to combine metadata and
+content of the articles. But for now let us turn back the clock
 to follow along my journey of developing the package.
 
 # Hacking Away
