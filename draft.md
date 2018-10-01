@@ -33,13 +33,12 @@ to follow along my journey of developing the package.
 Back in March 2017, I was starting out as a MA-student of
 sociology in a research project
 concerned with the scientific elite within sociology and economics. The project
-had many goals, but writing an R package was not one of them. At the beginning
-of my engagement,
+had many goals, but writing an R package was not one of them. At the start,
 I was presented with a dataset which was huge, at least for my terms: 
 around 30GB of data, half of which was text, the other half 500,000 `.xml`-files.
 The dataset was incredible in its depth: we basically sat on all articles
 from JSTOR which belonged to the topics "sociology" and "economics". To repeat:
-all articles that JSTOR has on those topics for all years.
+all articles that JSTOR has on those topics for all the time JSTOR has data on.
 
 My task was to somehow make this data accessible for our research. Since we are
 sociologists and no computer experts and my knowledge of R was mainly 
