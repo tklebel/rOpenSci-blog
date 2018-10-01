@@ -274,12 +274,12 @@ microbenchmark::microbenchmark(fun1(), fun2(), fun3(), times = 1000)
 ```
 Although the unit is microseconds here, the difference between `fun2` and 
 `fun3` is quite substantial, if you want to do it 500,000 times: 4.5 minutes. If
-you have to extract elements often (which I was doing), than this quickly adds 
+you have to extract elements often (which I was doing), then this quickly adds 
 up. What is the reason for this big difference?
 I'd guess that `fun2` is fastest since it only calls two functions, and not 
 four, and because `xml_text()` probably converts the content directly to 
-character in C++, which is faster than calling `as.character` afterwards. But
-I am still a *social* scientist, so I wouldn't bet on that explanation.
+character in C++, which is faster than calling `as.character` afterwards. Still, 
+I am not a computer scientist, so I am not so very sure.
 
 
 After rewriting and expanding the functionality, I was still not happy, however,
