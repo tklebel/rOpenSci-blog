@@ -217,7 +217,7 @@ my functions into a package early on, and had already included many test cases
 with [testthat](https://github.com/r-lib/testthat)
 to make sure everything works as expected. This helped a lot for re-structuring
 the code, since I already knew what my output should look like, and I only had 
-to change the steps in between.
+to change the intermediate steps.
 
 The work on re-writing progressed quickly. The first step was to simply extract
 the identifier for the journal within which the article was published:
