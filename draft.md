@@ -51,7 +51,7 @@ like that, and I surely did it like that, but there would probably be more
 efficient solutions.
 
 So, I had to start somewhere, and that was obviously importing the data into R.
-After searching and trying out different packages, I settled on 
+After searching and trying different packages, I settled on 
 `xml2::read_xml()`. But then what. I had done a few pet projects with 
 web-scraping, but had no knowledge of XPATH-expressions and how to access 
 certain parts of the document directly. After some stumbling around, I had found
