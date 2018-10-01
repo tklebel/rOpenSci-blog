@@ -429,11 +429,11 @@ standard interface of JSTOR/DfR, execution time is slightly under 4 minutes, or
 
 
 # Lessons learned
-I have learned many things while working on this package. While I aquired 
+I have learned many things while working on this package. While I acquired 
 certain skills (like writing simple XPATH-queries), I want highlight a few 
 general things.
 
-Something that is true probably for many people working with and developing for
+Something which is probably true for many people working with and developing for
 R, is that community is important. Without the efforts of many others, through
 paid work or by spending their time voluntarily, developing the package would
 not have been possible. This is true for the many packages my code builds on,
@@ -481,5 +481,4 @@ are [#23](https://github.com/ropensci/jstor/issues/23)
 and [#32](https://github.com/ropensci/jstor/issues/32).
 Any help, even fixing typos in the vignettes or documentation, is greatly 
 appreciated, so if you want to get into contributing to a package, just go for 
-it! I will help you with any hickups along the way, especially with questions
-regarding Git, GitHub and pull requests.
+it! I will try to help you with any hiccups along the way.
