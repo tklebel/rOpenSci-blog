@@ -420,7 +420,7 @@ profvis::profvis({
 
 ![](screenshots/new_version.png)
 
-By assessing the efficiency of functions repeatedly and optimising several
+In the end, by assessing the efficiency of functions repeatedly and optimising several
 parts,
 I was able to trim down execution time considerably overall. For 25,000 files,
 which is the maximum amount of files you can receive at one time through the
