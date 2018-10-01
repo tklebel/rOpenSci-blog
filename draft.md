@@ -29,7 +29,7 @@ There is also a lengthy case study that also shows how to combine metadata and
 data about the content of the articles. But for now let us turn back the clock
 to follow along my journey of developing the package.
 
-# Step 1: Hacking Away
+# Hacking Away
 Back in March 2017, I was starting out as a MA-student of
 sociology in a research project
 concerned with the scientific elite within sociology and economics. The project
@@ -212,7 +212,7 @@ I hard-coded passwords for our server and commited them into git.)
 
 
 
-# Step two: doing it properly
+# Doing It Properly
 Rewriting my functions was not that much of a hassle, in the end. I had turned
 my functions into a package early on, and had already included many test cases
 with [testthat](https://github.com/r-lib/testthat)
@@ -306,9 +306,9 @@ microbenchmark::microbenchmark(
 
 ```
 ## Unit: microseconds
-##        expr     min       lq      mean  median      uq      max neval
-##      tibble 322.624 329.4365 356.78152 332.833 346.659 1093.364   100
-##  new_tibble  74.164  79.0430  94.56018  83.241  87.274  845.342   100
+##        expr     min       lq     mean   median      uq      max neval
+##      tibble 332.902 479.7430 624.1354 621.7795 716.437 1944.658   100
+##  new_tibble  76.833 106.5485 155.4881 151.2890 172.570  974.428   100
 ```
 
 The difference is not huge (~50sec for 500,000 documents), but my actual layout
@@ -348,9 +348,9 @@ microbenchmark::microbenchmark(
 
 ```
 ## Unit: microseconds
-##  expr      min        lq      mean   median       uq       max neval
-##   old 3956.140 4106.7390 4708.4932 4255.307 4731.791  9476.675   100
-##   new  250.872  267.5145  505.5482  317.850  328.885 18255.590   100
+##  expr      min       lq      mean   median       uq      max neval
+##   old 3973.088 4168.759 5195.9013 4615.224 5617.265 12761.89   100
+##   new  246.695  266.216  586.4228  316.517  356.386 22031.18   100
 ```
 
 The difference is significant, amounting to around 40 minutes more for
@@ -429,14 +429,58 @@ standard interface of JSTOR/DfR, execution time is slightly under 4 minutes, or
 2 minutes if executed in parallel, at least on my moderately fast MacBook Pro.
 
 
-# Lessons learned: 
+# Lessons learned
+I have learned many things while working on this package. While I aquired 
+certain skills (like writing simple XPATH-queries), I want highlight a few 
+general things.
 
-- community is important
-- what could I have done differently?
-Decision for API: each function is self-contained. If I had extracted the parts
-for import somehow, it would be faster to apply different functions (like for
-metada and references and other stuff).
+Something that is true probably for many people working with and developing for
+R, is that community is important. Without the efforts of many others, through
+paid work or by spending their time voluntarily, developing the package would
+not have been possible. This is true for the many packages my code builds on,
+for the suite of packages that helps in developing and maintaining packages,
+for answers I got over StackOverflow, and last but not least for the helpful
+comments I received by @elinw and @jsonbecker during the review process for
+onboarding the package.
 
-# Acknowledgements
+A lesson which is more or less obvious from what I wrote above would be to 
+benchmark your code, if you are planning on running it often. Packages like
+`microbenchmark`, `profvis` or `bench` can help you in different ways to make 
+sure that your code runs more efficiently. 
+
+At the beginning of the post I mentioned, that there would probably be a better
+approach on parsing those files altogether. Before I finish, I want to briefly
+elaborate on that thought.
+
+The general approach I took when writing the package was inspired by the idea of
+functional programming, that can be implemented in R through `lapply` or similar
+functions within the `purrr`-package. The approach is to write a function that
+solves your problem for one case, and then to apply it to all cases. In my case,
+this leads to some duplication and inefficiency: The package has serveral 
+functions that extract certain parts of the metadata-files. This makes sense,
+since you only might be interested in certain parts, and parsing everything else
+would be a waste of time. Unfortunately, if you happen to be interested in two
+parts all the time, this means that each function has to read the original file
+separately. There is no economy of scales, so to speak, because the file is
+read again for each part which is to be extracted. An alternative would have 
+been to write a general wrapper function that reads in the files and then 
+applies each function in turn. I suspect that this would be quite complex, given
+that the code should also be able to run in parallel in a proper way. This, and
+the fact that I already spent *a lot* of time writing the package, mean that
+I will most likely not add improvements on this side. There are however many 
+other options for improvement, and I will gladly point you to a few of them.
 
 # Options to contribute
+I have strived for a proper test coverage, and I'd say it is decent at 91%.
+There are a few cases where adding coverage would not be too difficult, which I
+have mentioned in 
+[issue #71](https://github.com/ropensci/jstor/issues/71). Another area
+where there is still some work is in adding a few more fields which could be
+extracted from the documents. This would involve some XPATH, but could be a good
+starting point if you are curious about how those work. The corresponding issues
+are [#23](https://github.com/ropensci/jstor/issues/23)
+and [#32](https://github.com/ropensci/jstor/issues/32).
+Any help, even fixing typos in the vignettes or documentation, is greatly 
+appreciated, so if you want to get into contributing to a package, just go for 
+it! I will help you with any hickups along the way, especially with questions
+regarding Git, GitHub and pull requests.
