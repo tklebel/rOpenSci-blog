@@ -306,59 +306,57 @@ microbenchmark::microbenchmark(
 
 ```
 ## Unit: microseconds
-##        expr     min      lq     mean   median       uq      max neval
-##      tibble 323.094 333.583 387.6665 338.8075 370.9175 1287.835   100
-##  new_tibble  74.496  81.295 110.7023  86.2195  89.9845 1519.435   100
+##        expr     min       lq      mean  median      uq      max neval
+##      tibble 322.624 329.4365 356.78152 332.833 346.659 1093.364   100
+##  new_tibble  74.164  79.0430  94.56018  83.241  87.274  845.342   100
 ```
 
-The difference is not huge (~50sec for 500000 documents), but my actual layout
+The difference is not huge (~50sec for 500,000 documents), but my actual layout
 was a lot more complex, since it was using nested structures in a weird way:
 
 
 ```r
 # dummy function for getting the data
-get_authors <- function() {
-  tibble::tribble(
-    ~first_name, ~last_name, ~author_number,
-    "Pierre",    "Bourdieu", 1,
-    "Max",       "Weber",    2,
-    "Karl",      "Marx",     3
-  )
-}
+authors <- tibble::tribble(
+  ~first_name, ~last_name, ~author_number,
+  "Pierre",    "Bourdieu", 1,
+  "Max",       "Weber",    2,
+  "Karl",      "Marx",     3
+)
 
 # this approach made sense to me, since the data structure was indeed nested,
 # and it seemed similar to the approach of mutate + map + unnest.
-old_approach <- function() {
+old_approach <- function(authors) {
   res <- tibble::data_frame(id = "1",
-                            authors = list(get_authors()))
+                            authors = list(authors))
   
   tidyr::unnest(res, authors)
 }
 
 # this is obviously a lot simpler
-new_approach <- function() {
+new_approach <- function(authors) {
   data.frame(id = "1",
-             authors = get_authors())
+             authors = authors)
 }
 
 
 microbenchmark::microbenchmark(
-  old = old_approach(),
-  new = new_approach()
+  old = old_approach(authors),
+  new = new_approach(authors)
 )
 ```
 
 ```
-## Unit: milliseconds
-##  expr      min        lq     mean   median       uq      max neval
-##   old 5.566752 25.663635 47.80820 34.15654 51.17691 345.4876   100
-##   new 1.839041  7.727445 14.64343 10.44802 15.97281 150.5579   100
+## Unit: microseconds
+##  expr      min        lq      mean   median       uq       max neval
+##   old 3956.140 4106.7390 4708.4932 4255.307 4731.791  9476.675   100
+##   new  250.872  267.5145  505.5482  317.850  328.885 18255.590   100
 ```
 
 The difference is significant, amounting to around 40 minutes more for
 500,000 documents, if I would have kept the old version.
 
-Unfortunately, using profvis for
+Unfortunately, using `profvis` for
 such small and fast functions does not work well out of the box:
 
 
@@ -398,7 +396,6 @@ profvis::profvis({
     tidyr::unnest(res, authors)
   }
 
-  authors <- get_authors()
   purrr::rerun(500, old_approach(authors))
 })
 ```
@@ -419,7 +416,6 @@ profvis::profvis({
                authors = authors)
   }
   
-  authors <- get_authors()
   purrr::rerun(500, new_approach(authors))})
 ```
 

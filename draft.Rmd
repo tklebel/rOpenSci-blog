@@ -300,39 +300,37 @@ microbenchmark::microbenchmark(
 )
 ```
 
-The difference is not huge (~50sec for 500000 documents), but my actual layout
+The difference is not huge (~50sec for 500,000 documents), but my actual layout
 was a lot more complex, since it was using nested structures in a weird way:
 
 ```{r}
 # dummy function for getting the data
-get_authors <- function() {
-  tibble::tribble(
-    ~first_name, ~last_name, ~author_number,
-    "Pierre",    "Bourdieu", 1,
-    "Max",       "Weber",    2,
-    "Karl",      "Marx",     3
-  )
-}
+authors <- tibble::tribble(
+  ~first_name, ~last_name, ~author_number,
+  "Pierre",    "Bourdieu", 1,
+  "Max",       "Weber",    2,
+  "Karl",      "Marx",     3
+)
 
 # this approach made sense to me, since the data structure was indeed nested,
 # and it seemed similar to the approach of mutate + map + unnest.
-old_approach <- function() {
+old_approach <- function(authors) {
   res <- tibble::data_frame(id = "1",
-                            authors = list(get_authors()))
+                            authors = list(authors))
   
   tidyr::unnest(res, authors)
 }
 
 # this is obviously a lot simpler
-new_approach <- function() {
+new_approach <- function(authors) {
   data.frame(id = "1",
-             authors = get_authors())
+             authors = authors)
 }
 
 
 microbenchmark::microbenchmark(
-  old = old_approach(),
-  new = new_approach()
+  old = old_approach(authors),
+  new = new_approach(authors)
 )
 
 ```
@@ -340,7 +338,7 @@ microbenchmark::microbenchmark(
 The difference is significant, amounting to around 40 minutes more for
 500,000 documents, if I would have kept the old version.
 
-Unfortunately, using profvis for
+Unfortunately, using `profvis` for
 such small and fast functions does not work well out of the box:
 
 ```{r, eval=FALSE}
@@ -378,7 +376,6 @@ profvis::profvis({
     tidyr::unnest(res, authors)
   }
 
-  authors <- get_authors()
   purrr::rerun(500, old_approach(authors))
 })
 ```
@@ -398,7 +395,6 @@ profvis::profvis({
                authors = authors)
   }
   
-  authors <- get_authors()
   purrr::rerun(500, new_approach(authors))})
 ```
 
