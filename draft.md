@@ -290,8 +290,8 @@ enough, I had introduced a bottleneck right at the beginning: I was using
 `data_frame` (which is equivalent to `tibble()`) to create the object my 
 function would return. Unfortunately, `tibble` (and `data.frame` as well) are
 quite complex functions. They do type
-checking and other things, and if you do this repeatedly, it quickly adds up and
-is not very smart in general, since I know exactly what kind of data to expect
+checking and other things, and if you do this repeatedly, it quickly adds up. 
+In my case it is not very smart, since I know exactly what kind of data to expect
 (if I wrote the rest of my functions appropriately).
 
 You can see the difference yourself:
