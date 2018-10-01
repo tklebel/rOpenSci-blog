@@ -150,7 +150,7 @@ time, that I would
 need to import the files more than once or at most twice
 (which I had to do later to update results
 after we got new versions with better data), I decided that this was too slow,
-and I looked for options. 
+and I looked for better options. 
 
 The first idea which I had was simply to scale computing power: I had a faster
 machine at home, and planned to read the data into R at work, save it as `.rds`,
