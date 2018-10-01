@@ -169,10 +169,10 @@ He had a further hint:
 desired data, even if you have to rewrite code. [...] Xpath extracting just the elements you are interested in is going to run much faster than converting the entire data to a list first then manipulating that. ~Jim Hester
 
 
-And this is what I did. For the fun of it, I benchmarked two versions: my 
+And this is what I did. Just to be sure, I benchmarked two versions: my 
 function before re-writing to using XPATH expressions, and the function today.
 The current version is a lot safer and handles many edge-cases, but it is still
-around 5 times faster. Furthermore, it depends less on how complex the original
+around 5 times faster. Furthermore, the processing time depends less on how complex the original
 file is, and more on how much information is being read. With the new version
 of the function, around 30% of the time is spent on reading the file, while 
 with the old version it was around 85% of the time.
