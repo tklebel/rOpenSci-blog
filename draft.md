@@ -249,8 +249,8 @@ to learn how to navigate within the document via XPATH.
 
 Another thing I took up
 during this re-write was regularly benchmarking my functions. Since I lacked 
-(and still lack) the technical expertise to know which approach would be faster,
-I had to benchmark possibilities to figure it out. The following benchmark 
+the technical expertise to know (by design) which approach would be faster,
+I benchmarked possibilities to figure it out. The following benchmark 
 compares three versions of extracting the text from the node named `volume`.
 Especially the first two seemed very similar to me and it was not at all 
 obvious, which one would be faster.
