@@ -69,7 +69,7 @@ needed. The approach was cumbersome, and the code was not pretty, since the
 original documents are deeply nested and the structure is not always the same.
 But it worked, and I was happy with it. 
 
-My functions looked something like the following:
+My functions looked something like this:
 
 ```r
 extract_contributors <- function(contributors) {
@@ -140,7 +140,7 @@ extract_name <- function(x) {
 But, as I said, I was solving problems with the tools I already knew, so I was
 happy.
 
-At some point though, I started benchmarking my solutions. I tried out 
+At some point though, I started benchmarking my solutions. I tried out  
 `mclapply` and it doubled the speed of execution on my machine, but it was still
 very slow: Parsing the content *after* importing and transforming it into a list
 took 7.2 seconds for 3000 files. For 200,000 files of sociological 
