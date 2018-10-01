@@ -369,7 +369,7 @@ profvis::profvis({
 ```
 
 A simple solution is to rerun the function many times. Note, however, that this
-does not increase realiabity and reproducibility of the results. The function is
+does not increase reliability and reproducibility of the results. The function is
 not measured 500 times, the result
 being the mean or median (like in `microbenchmark`), but it is simply the 
 aggregate of running the function 500 times. This can vary quite a bit. All in
@@ -377,7 +377,7 @@ all, tough, I found it still useful to judge if any part of the code is orders
 of magnitude slower than the rest.
 
 In the following chunk
-I define the function again for two reasons: first to separate all cumputations
+I define the function again for two reasons: first to separate all computations
 into separate lines. This ensures, that we get a measurement for each line.
 Second, the code needs to be supplied either within the call to profvis, or it
 must be defined in a sourced file, otherwise the output will not be as 
