@@ -63,18 +63,17 @@ After searching and trying different packages, I settled on
 web-scraping but had no knowledge of XPATH-expressions and how to access 
 certain parts of the document directly. After some stumbling around, I had found
 `xml2::as_list()` and was very happy: I could turn this unpleasant creature of
-XML into a pretty list, which I was accustomed to. 
-Since I tracked all my steps via git,
-you can join in on my joy:
+XML into a pretty list, which I was accustomed to. My happiness is obvious when
+looking at the relevant commit message and the corresponding changes.
 
 ![](screenshots/lists.png)
 
 
-Then I would use something
+After turing the XML into a list, I would use something
 like `listviewer::jsonedit()` to inspect the elements, and extract what I 
 needed. The approach was cumbersome, and the code was not pretty, since the
-original documents are deeply nested, and the structure is not always the same.
-But it worked, and I was happy with it. 
+original documents are deeply nested, and the structure was not always the same.
+But it worked, and I was happy with it, for the time being. 
 
 My functions looked something like this:
 
@@ -150,7 +149,7 @@ happy.
 At some point though, I started benchmarking my solutions. I experimented with
 `mclapply` and it doubled the speed of execution on my machine, but it was still
 very slow: Parsing the content *after* importing and transforming it into a list
-took 7.2 seconds for 3000 files. For 200,000 files of sociological 
+took 7.2 seconds for 3,000 files. For 200,000 files of sociological 
 articles this would amount to 8 hours. And importing and
 converting to a list took a lot of time too. Although I didn't think at that 
 time, that I would
@@ -480,9 +479,9 @@ I have strived for a proper test coverage, and I'd say it is decent at 91%.
 There are a few cases where adding coverage would not be too difficult, which I
 have mentioned in 
 [issue #71](https://github.com/ropensci/jstor/issues/71). Another area
-where there is still some work is in adding a few more fields which could be
-extracted from the documents. This would involve some XPATH but could be a good
-starting point if you are curious about how those work. The corresponding issues
+where there is still some work to do is extracting a few more fields 
+from the documents. This would involve some XPATH but could be a good
+starting point if you are curious about how this works. The corresponding issues
 are [#23](https://github.com/ropensci/jstor/issues/23)
 and [#32](https://github.com/ropensci/jstor/issues/32).
 Any help, even fixing typos in the vignettes or documentation, is greatly 
