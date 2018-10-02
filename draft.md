@@ -1,5 +1,5 @@
 ---
-title: 'jstor: Parsing XML - Lessons From Writing a Package'
+title: 'Parsing Metadata with R - A Package Story'
 author: "Thomas Klebel"
 date: "30 9 2018"
 output: 
@@ -7,12 +7,15 @@ output:
     keep_md: true
 ---
 
-This is the story of `jstor`, a package which I wrote over the last year and a
-half. It is a story about learning how to parse XML efficiently and creating a
-piece of software that others will find useful. The story has many twists, and
-I would like to take you with me – on a journey that has told me many lessons.
+Every R package has its story. Some packages are written by experts, some by 
+novices. Some are developed quickly, others were long in the making. This is the
+story of `jstor`, a package which I developed during my time as a student of
+sociology, working in a research project on the scientific elite within 
+sociology. Writing the package has taught me many things (more on that later)
+and it is deeply gratifying to see, that others find the package useful.
 
-Before taking a look in the past, I want to give you some basic
+Before taking a look at the package's inception however, I want to give you some 
+basic
 information: JSTOR is a large archive for scientific texts, mainly known for 
 their coverage of journal articles, although they recently added book chapters
 and other sources as well. They make all of their content available for 
@@ -24,7 +27,10 @@ how to use it is on the [package website](https://ropensci.github.io/jstor/).
 You will find three vignettes, with a general introduction, examples on how to
 import many files at once, and a few examples of known quirks of JSTORs data.
 There is also a lengthy case study that shows how to combine metadata and
-content of the articles. But for now let us turn back the clock
+content of the articles. If you still need more information, you can also watch
+[my presentation at this year's useR! in Brisbane](https://www.youtube.com/watch?v=kNRbT-ki9tU&t) or dive into the 
+[slides](https://speakerdeck.com/tklebel/jstor-an-r-package-for-analysing-scientific-articles). 
+But for now let us turn back the clock
 to follow along my journey of developing the package.
 
 # Hacking Away
