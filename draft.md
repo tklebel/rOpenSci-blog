@@ -1,5 +1,5 @@
 ---
-title: 'jstor: Parsing XML - Lessons From Writing a Package'
+title: 'Parsing Metadata with R - A Package Story'
 author: "Thomas Klebel"
 date: "30 9 2018"
 output: 
@@ -7,15 +7,16 @@ output:
     keep_md: true
 ---
 
+Every R package has its story. Some packages are written by experts, some by 
+novices. Some are developed quickly, others were long in the making. This is the
+story of `jstor`, a package which I developed during my time as a student of
+sociology, working in a research project on the scientific elite within 
+sociology. Writing the package has taught me many things (more on that later)
+and it is deeply gratifying to see, that others find the package useful.
 
-
-This is the story of `jstor`, a package that I wrote over the last year and a
-half. It is a story about learning how to parse XML efficiently and creating a
-piece of software that others will find useful. The story has many twists, and
-I would like to take you with me – on a journey that has told me many lessons.
-
-Before taking on the look back into the past, I want to give you some basic
-information. JSTOR is a large archive for scientific texts, mainly known for 
+Before taking a look at the package's inception however, I want to give you some 
+basic
+information: JSTOR is a large archive for scientific texts, mainly known for 
 their coverage of journal articles, although they recently added book chapters
 and other sources as well. They make all of their content available for 
 researchers to do text mining, citation analysis, and everything else you could
@@ -25,36 +26,41 @@ helper functions for common cleaning tasks. Everything you need to know about
 how to use it is on the [package website](https://ropensci.github.io/jstor/).
 You will find three vignettes, with a general introduction, examples on how to
 import many files at once, and a few examples of known quirks of JSTORs data.
-There is also a lengthy case study that also shows how to combine metadata and
-data about the content of the articles. But for now let us turn back the clock
+There is also a lengthy case study that shows how to combine metadata and
+information on the articles' content. If you still need more information, you 
+can also watch
+[my presentation at this year's useR! in Brisbane](https://www.youtube.com/watch?v=kNRbT-ki9tU&t) or dive into the 
+[slides](https://speakerdeck.com/tklebel/jstor-an-r-package-for-analysing-scientific-articles). 
+But for now, let us turn back the clock
 to follow along my journey of developing the package.
 
 # Hacking Away
 Back in March 2017, I was starting out as a MA-student of
 sociology in a research project
 concerned with the scientific elite within sociology and economics. The project
-had many goals, but writing an R package was not one of them. At the beginning
-of my engagement,
+had many goals but writing an R package was not one of them. At the start,
 I was presented with a dataset which was huge, at least for my terms: 
 around 30GB of data, half of which was text, the other half 500,000 `.xml`-files.
 The dataset was incredible in its depth: we basically sat on all articles
 from JSTOR which belonged to the topics "sociology" and "economics". To repeat:
-all articles that JSTOR has on those topics for all years.
+all articles that JSTOR has on those topics for all years JSTOR has data on.
 
 My task was to somehow make this data accessible for our research. Since we are
-sociologists and no computer experts and my knowledge of R was mainly 
+sociologists and no computer experts, and my knowledge of R was mainly 
 self-taught, my approach was quite ad-hoc: "let's see, how we can extract 
-relevant information for one file, and then maybe we can lapply over the whole
+relevant information for one file, and then maybe we can `lapply` over the whole
 set of files." That is what the tidyverse philosophy and purrr tell you to do:
-solve it for one case using a function, and apply this function to the whole
+solve it for one case using a function and apply this function to the whole
 set of files, cases, nested rows, or whatever. Long story short, you can do it
-like that, and I surely did it like that, but there would probably be more 
-efficient solutions.
+like that, and I surely did it like that. But if I could start over and write
+a new version of the package, I would 
+probably do a few things differently, one of which I discuss near the end of the
+post.
 
 So, I had to start somewhere, and that was obviously importing the data into R.
-After searching and trying out different packages, I settled on 
+After searching and trying different packages, I settled on 
 `xml2::read_xml()`. But then what. I had done a few pet projects with 
-web-scraping, but had no knowledge of XPATH-expressions and how to access 
+web-scraping but had no knowledge of XPATH-expressions and how to access 
 certain parts of the document directly. After some stumbling around, I had found
 `xml2::as_list()` and was very happy: I could turn this unpleasant creature of
 XML into a pretty list, which I was accustomed to. 
@@ -67,10 +73,10 @@ you can join in on my joy:
 Then I would use something
 like `listviewer::jsonedit()` to inspect the elements, and extract what I 
 needed. The approach was cumbersome, and the code was not pretty, since the
-original documents are deeply nested and the structure is not always the same.
+original documents are deeply nested, and the structure is not always the same.
 But it worked, and I was happy with it. 
 
-My functions looked something like the following:
+My functions looked something like this:
 
 ```r
 extract_contributors <- function(contributors) {
@@ -125,7 +131,7 @@ file_paths %>%
 
 As can be expected when parsing deeply nested lists which do not always have
 the same structure, this quickly escalated into
-more and more complex and sometimes quite ridicoulus functions:
+more and more complex and sometimes quite ridiculous functions:
 
 ```r
 extract_name <- function(x) {
@@ -141,7 +147,7 @@ extract_name <- function(x) {
 But, as I said, I was solving problems with the tools I already knew, so I was
 happy.
 
-At some point though, I started benchmarking my solutions. I tried out 
+At some point though, I started benchmarking my solutions. I experimented with
 `mclapply` and it doubled the speed of execution on my machine, but it was still
 very slow: Parsing the content *after* importing and transforming it into a list
 took 7.2 seconds for 3000 files. For 200,000 files of sociological 
@@ -151,10 +157,10 @@ time, that I would
 need to import the files more than once or at most twice
 (which I had to do later to update results
 after we got new versions with better data), I decided that this was too slow,
-and I looked for options. 
+and I looked for better options. 
 
 The first idea which I had was simply to scale computing power: I had a faster
-machine at home, and planned to read the data into R at work, save it as `.rds`,
+machine at home and planned to read the data into R at work, save it as `.rds`,
 and then process it at home on the faster machine (for some reason I didn't want
 to carry the original data home). Apparently, this is not as easy as it sounds.
 If you parse a file with `xml2::read_xml()` you don't get the content of the
@@ -170,10 +176,10 @@ He had a further hint:
 desired data, even if you have to rewrite code. [...] Xpath extracting just the elements you are interested in is going to run much faster than converting the entire data to a list first then manipulating that. ~Jim Hester
 
 
-And this is what I did. For the fun of it, I benchmarked two versions: my 
+And this is what I did. Just to be sure, I benchmarked two versions: my 
 function before re-writing to using XPATH expressions, and the function today.
 The current version is a lot safer and handles many edge-cases, but it is still
-around 5 times faster. Furthermore, it depends less on how complex the original
+around 5 times faster. Furthermore, the processing time depends less on how complex the original
 file is, and more on how much information is being read. With the new version
 of the function, around 30% of the time is spent on reading the file, while 
 with the old version it was around 85% of the time.
@@ -214,11 +220,11 @@ I hard-coded passwords for our server and commited them into git.)
 
 # Doing It Properly
 Rewriting my functions was not that much of a hassle, in the end. I had turned
-my functions into a package early on, and had already included many test cases
+my functions into a package early on and had already included many test cases
 with [testthat](https://github.com/r-lib/testthat)
 to make sure everything works as expected. This helped a lot for re-structuring
 the code, since I already knew what my output should look like, and I only had 
-to change the steps in between.
+to change the intermediate steps.
 
 The work on re-writing progressed quickly. The first step was to simply extract
 the identifier for the journal within which the article was published:
@@ -250,8 +256,8 @@ to learn how to navigate within the document via XPATH.
 
 Another thing I took up
 during this re-write was regularly benchmarking my functions. Since I lacked 
-(and still lack) the technical expertise to know which approach would be faster,
-I had to benchmark possibilities to figure it out. The following benchmark 
+the technical expertise to know up front which approach would be faster,
+I benchmarked possibilities to figure it out. The following benchmark 
 compares three versions of extracting the text from the node named `volume`.
 Especially the first two seemed very similar to me and it was not at all 
 obvious, which one would be faster.
@@ -275,12 +281,12 @@ microbenchmark::microbenchmark(fun1(), fun2(), fun3(), times = 1000)
 ```
 Although the unit is microseconds here, the difference between `fun2` and 
 `fun3` is quite substantial, if you want to do it 500,000 times: 4.5 minutes. If
-you have to extract elements often (which I was doing), than this quickly adds 
+you have to extract elements often (which I was doing), then this quickly adds 
 up. What is the reason for this big difference?
 I'd guess that `fun2` is fastest since it only calls two functions, and not 
 four, and because `xml_text()` probably converts the content directly to 
-character in C++, which is faster than calling `as.character` afterwards. But
-I am still a *social* scientist, so I wouldn't bet on that explanation.
+character in C++, which is faster than calling `as.character` afterwards. Still, 
+I am not a computer scientist, so I am not entirely sure about that.
 
 
 After rewriting and expanding the functionality, I was still not happy, however,
@@ -290,10 +296,8 @@ I dug deeper again, using the package
 enough, I had introduced a bottleneck right at the beginning: I was using
 `data_frame` (which is equivalent to `tibble()`) to create the object my 
 function would return. Unfortunately, `tibble` (and `data.frame` as well) are
-quite complex functions. They do type
-checking and other things, and if you do this repeatedly, it quickly adds up and
-is not very smart in general, since I know exactly what kind of data to expect
-(if I wrote the rest of my functions appropriately).
+quite complex functions. They do type checking and other things, and if you do
+this repeatedly, it quickly adds up. 
 
 You can see the difference yourself:
 
@@ -370,7 +374,7 @@ profvis::profvis({
 ```
 
 A simple solution is to rerun the function many times. Note, however, that this
-does not increase realiabity and reproducibility of the results. The function is
+does not increase reliability and reproducibility of the results. The function is
 not measured 500 times, the result
 being the mean or median (like in `microbenchmark`), but it is simply the 
 aggregate of running the function 500 times. This can vary quite a bit. All in
@@ -378,11 +382,11 @@ all, tough, I found it still useful to judge if any part of the code is orders
 of magnitude slower than the rest.
 
 In the following chunk
-I define the function again for two reasons: first to separate all cumputations
+I define the function again for two reasons: first to separate all computations
 into separate lines. This ensures, that we get a measurement for each line.
-Second, the code needs to be supplied either within the call to profvis, or it
+Second, the code needs to be supplied either within the call to `profvis`, or it
 must be defined in a sourced file, otherwise the output will not be as 
-informative, because profvis will not be able to access the functions' source
+informative, because `profvis` will not be able to access the functions' source
 code.
 
 
@@ -421,20 +425,21 @@ profvis::profvis({
 
 ![](screenshots/new_version.png)
 
-By assessing the efficiency of functions repeatedly and optimising several
+In the end, by assessing the efficiency of functions repeatedly and optimising several
 parts,
 I was able to trim down execution time considerably overall. For 25,000 files,
-which is the maximum amount of files you can receive at one time through the
+which is the maximum number of files you can receive at one time through the
 standard interface of JSTOR/DfR, execution time is slightly under 4 minutes, or
-2 minutes if executed in parallel, at least on my moderately fast MacBook Pro.
+2 minutes if executed in parallel (at least on my machine with a 2,8GHz Intel 
+i5).
 
 
 # Lessons learned
-I have learned many things while working on this package. While I aquired 
-certain skills (like writing simple XPATH-queries), I want highlight a few 
+I have learned many things while working on this package. While I acquired 
+certain skills (like writing simple XPATH-queries), I want to highlight a few 
 general things.
 
-Something that is true probably for many people working with and developing for
+Something which is probably true for many people working with and developing for
 R, is that community is important. Without the efforts of many others, through
 paid work or by spending their time voluntarily, developing the package would
 not have been possible. This is true for the many packages my code builds on,
@@ -448,7 +453,7 @@ benchmark your code, if you are planning on running it often. Packages like
 `microbenchmark`, `profvis` or `bench` can help you in different ways to make 
 sure that your code runs more efficiently. 
 
-At the beginning of the post I mentioned, that there would probably be a better
+At the beginning of the post I mentioned, that there might be a better
 approach on parsing those files altogether. Before I finish, I want to briefly
 elaborate on that thought.
 
@@ -456,7 +461,7 @@ The general approach I took when writing the package was inspired by the idea of
 functional programming, that can be implemented in R through `lapply` or similar
 functions within the `purrr`-package. The approach is to write a function that
 solves your problem for one case, and then to apply it to all cases. In my case,
-this leads to some duplication and inefficiency: The package has serveral 
+this leads to some duplication and inefficiency: The package has several 
 functions that extract certain parts of the metadata-files. This makes sense,
 since you only might be interested in certain parts, and parsing everything else
 would be a waste of time. Unfortunately, if you happen to be interested in two
@@ -476,11 +481,10 @@ There are a few cases where adding coverage would not be too difficult, which I
 have mentioned in 
 [issue #71](https://github.com/ropensci/jstor/issues/71). Another area
 where there is still some work is in adding a few more fields which could be
-extracted from the documents. This would involve some XPATH, but could be a good
+extracted from the documents. This would involve some XPATH but could be a good
 starting point if you are curious about how those work. The corresponding issues
 are [#23](https://github.com/ropensci/jstor/issues/23)
 and [#32](https://github.com/ropensci/jstor/issues/32).
 Any help, even fixing typos in the vignettes or documentation, is greatly 
 appreciated, so if you want to get into contributing to a package, just go for 
-it! I will help you with any hickups along the way, especially with questions
-regarding Git, GitHub and pull requests.
+it! I will try to help you with any hiccups along the way.
