@@ -131,7 +131,7 @@ file_paths %>%
 
 As can be expected when parsing deeply nested lists which do not always have
 the same structure, this quickly escalated into
-more and more complex and sometimes quite ridicoulus functions:
+more and more complex and sometimes quite ridiculous functions:
 
 ```r
 extract_name <- function(x) {
@@ -384,7 +384,7 @@ of magnitude slower than the rest.
 In the following chunk
 I define the function again for two reasons: first to separate all computations
 into separate lines. This ensures, that we get a measurement for each line.
-Second, the code needs to be supplied either within the call to profvis, or it
+Second, the code needs to be supplied either within the call to `profvis`, or it
 must be defined in a sourced file, otherwise the output will not be as 
 informative, because profvis will not be able to access the functions' source
 code.
@@ -461,7 +461,7 @@ The general approach I took when writing the package was inspired by the idea of
 functional programming, that can be implemented in R through `lapply` or similar
 functions within the `purrr`-package. The approach is to write a function that
 solves your problem for one case, and then to apply it to all cases. In my case,
-this leads to some duplication and inefficiency: The package has serveral 
+this leads to some duplication and inefficiency: The package has several 
 functions that extract certain parts of the metadata-files. This makes sense,
 since you only might be interested in certain parts, and parsing everything else
 would be a waste of time. Unfortunately, if you happen to be interested in two
