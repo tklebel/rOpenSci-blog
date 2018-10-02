@@ -7,8 +7,6 @@ output:
     keep_md: true
 ---
 
-
-
 This is the story of `jstor`, a package which I wrote over the last year and a
 half. It is a story about learning how to parse XML efficiently and creating a
 piece of software that others will find useful. The story has many twists, and
