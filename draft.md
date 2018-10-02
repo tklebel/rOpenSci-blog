@@ -31,14 +31,14 @@ information on the articles' content. If you still need more information, you
 can also watch
 [my presentation at this year's useR! in Brisbane](https://www.youtube.com/watch?v=kNRbT-ki9tU&t) or dive into the 
 [slides](https://speakerdeck.com/tklebel/jstor-an-r-package-for-analysing-scientific-articles). 
-But for now let us turn back the clock
+But for now, let us turn back the clock
 to follow along my journey of developing the package.
 
 # Hacking Away
 Back in March 2017, I was starting out as a MA-student of
 sociology in a research project
 concerned with the scientific elite within sociology and economics. The project
-had many goals, but writing an R package was not one of them. At the start,
+had many goals but writing an R package was not one of them. At the start,
 I was presented with a dataset which was huge, at least for my terms: 
 around 30GB of data, half of which was text, the other half 500,000 `.xml`-files.
 The dataset was incredible in its depth: we basically sat on all articles
@@ -46,11 +46,11 @@ from JSTOR which belonged to the topics "sociology" and "economics". To repeat:
 all articles that JSTOR has on those topics for all years JSTOR has data on.
 
 My task was to somehow make this data accessible for our research. Since we are
-sociologists and no computer experts and my knowledge of R was mainly 
+sociologists and no computer experts, and my knowledge of R was mainly 
 self-taught, my approach was quite ad-hoc: "let's see, how we can extract 
 relevant information for one file, and then maybe we can `lapply` over the whole
 set of files." That is what the tidyverse philosophy and purrr tell you to do:
-solve it for one case using a function, and apply this function to the whole
+solve it for one case using a function and apply this function to the whole
 set of files, cases, nested rows, or whatever. Long story short, you can do it
 like that, and I surely did it like that. But if I could start over and write
 a new version of the package, I would 
@@ -60,7 +60,7 @@ post.
 So, I had to start somewhere, and that was obviously importing the data into R.
 After searching and trying different packages, I settled on 
 `xml2::read_xml()`. But then what. I had done a few pet projects with 
-web-scraping, but had no knowledge of XPATH-expressions and how to access 
+web-scraping but had no knowledge of XPATH-expressions and how to access 
 certain parts of the document directly. After some stumbling around, I had found
 `xml2::as_list()` and was very happy: I could turn this unpleasant creature of
 XML into a pretty list, which I was accustomed to. 
@@ -73,7 +73,7 @@ you can join in on my joy:
 Then I would use something
 like `listviewer::jsonedit()` to inspect the elements, and extract what I 
 needed. The approach was cumbersome, and the code was not pretty, since the
-original documents are deeply nested and the structure is not always the same.
+original documents are deeply nested, and the structure is not always the same.
 But it worked, and I was happy with it. 
 
 My functions looked something like this:
@@ -160,7 +160,7 @@ after we got new versions with better data), I decided that this was too slow,
 and I looked for better options. 
 
 The first idea which I had was simply to scale computing power: I had a faster
-machine at home, and planned to read the data into R at work, save it as `.rds`,
+machine at home and planned to read the data into R at work, save it as `.rds`,
 and then process it at home on the faster machine (for some reason I didn't want
 to carry the original data home). Apparently, this is not as easy as it sounds.
 If you parse a file with `xml2::read_xml()` you don't get the content of the
@@ -220,7 +220,7 @@ I hard-coded passwords for our server and commited them into git.)
 
 # Doing It Properly
 Rewriting my functions was not that much of a hassle, in the end. I had turned
-my functions into a package early on, and had already included many test cases
+my functions into a package early on and had already included many test cases
 with [testthat](https://github.com/r-lib/testthat)
 to make sure everything works as expected. This helped a lot for re-structuring
 the code, since I already knew what my output should look like, and I only had 
@@ -386,7 +386,7 @@ I define the function again for two reasons: first to separate all computations
 into separate lines. This ensures, that we get a measurement for each line.
 Second, the code needs to be supplied either within the call to `profvis`, or it
 must be defined in a sourced file, otherwise the output will not be as 
-informative, because profvis will not be able to access the functions' source
+informative, because `profvis` will not be able to access the functions' source
 code.
 
 
@@ -428,7 +428,7 @@ profvis::profvis({
 In the end, by assessing the efficiency of functions repeatedly and optimising several
 parts,
 I was able to trim down execution time considerably overall. For 25,000 files,
-which is the maximum amount of files you can receive at one time through the
+which is the maximum number of files you can receive at one time through the
 standard interface of JSTOR/DfR, execution time is slightly under 4 minutes, or
 2 minutes if executed in parallel (at least on my machine with a 2,8GHz Intel 
 i5).
@@ -436,7 +436,7 @@ i5).
 
 # Lessons learned
 I have learned many things while working on this package. While I acquired 
-certain skills (like writing simple XPATH-queries), I want highlight a few 
+certain skills (like writing simple XPATH-queries), I want to highlight a few 
 general things.
 
 Something which is probably true for many people working with and developing for
@@ -453,7 +453,7 @@ benchmark your code, if you are planning on running it often. Packages like
 `microbenchmark`, `profvis` or `bench` can help you in different ways to make 
 sure that your code runs more efficiently. 
 
-At the beginning of the post I mentioned, that there would probably be a better
+At the beginning of the post I mentioned, that there might be a better
 approach on parsing those files altogether. Before I finish, I want to briefly
 elaborate on that thought.
 
@@ -481,7 +481,7 @@ There are a few cases where adding coverage would not be too difficult, which I
 have mentioned in 
 [issue #71](https://github.com/ropensci/jstor/issues/71). Another area
 where there is still some work is in adding a few more fields which could be
-extracted from the documents. This would involve some XPATH, but could be a good
+extracted from the documents. This would involve some XPATH but could be a good
 starting point if you are curious about how those work. The corresponding issues
 are [#23](https://github.com/ropensci/jstor/issues/23)
 and [#32](https://github.com/ropensci/jstor/issues/32).
