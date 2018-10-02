@@ -27,7 +27,8 @@ how to use it is on the [package website](https://ropensci.github.io/jstor/).
 You will find three vignettes, with a general introduction, examples on how to
 import many files at once, and a few examples of known quirks of JSTORs data.
 There is also a lengthy case study that shows how to combine metadata and
-content of the articles. If you still need more information, you can also watch
+information on the articles' content. If you still need more information, you 
+can also watch
 [my presentation at this year's useR! in Brisbane](https://www.youtube.com/watch?v=kNRbT-ki9tU&t) or dive into the 
 [slides](https://speakerdeck.com/tklebel/jstor-an-r-package-for-analysing-scientific-articles). 
 But for now let us turn back the clock
@@ -42,17 +43,19 @@ I was presented with a dataset which was huge, at least for my terms:
 around 30GB of data, half of which was text, the other half 500,000 `.xml`-files.
 The dataset was incredible in its depth: we basically sat on all articles
 from JSTOR which belonged to the topics "sociology" and "economics". To repeat:
-all articles that JSTOR has on those topics for all the time JSTOR has data on.
+all articles that JSTOR has on those topics for all years JSTOR has data on.
 
 My task was to somehow make this data accessible for our research. Since we are
 sociologists and no computer experts and my knowledge of R was mainly 
 self-taught, my approach was quite ad-hoc: "let's see, how we can extract 
-relevant information for one file, and then maybe we can lapply over the whole
+relevant information for one file, and then maybe we can `lapply` over the whole
 set of files." That is what the tidyverse philosophy and purrr tell you to do:
 solve it for one case using a function, and apply this function to the whole
 set of files, cases, nested rows, or whatever. Long story short, you can do it
-like that, and I surely did it like that, but there would probably be more 
-efficient solutions.
+like that, and I surely did it like that. But if I could start over and write
+a new version of the package, I would 
+probably do a few things differently, one of which I discuss near the end of the
+post.
 
 So, I had to start somewhere, and that was obviously importing the data into R.
 After searching and trying different packages, I settled on 
@@ -144,7 +147,7 @@ extract_name <- function(x) {
 But, as I said, I was solving problems with the tools I already knew, so I was
 happy.
 
-At some point though, I started benchmarking my solutions. I tried out  
+At some point though, I started benchmarking my solutions. I experimented with
 `mclapply` and it doubled the speed of execution on my machine, but it was still
 very slow: Parsing the content *after* importing and transforming it into a list
 took 7.2 seconds for 3000 files. For 200,000 files of sociological 
@@ -253,7 +256,7 @@ to learn how to navigate within the document via XPATH.
 
 Another thing I took up
 during this re-write was regularly benchmarking my functions. Since I lacked 
-the technical expertise to know (by design) which approach would be faster,
+the technical expertise to know up front which approach would be faster,
 I benchmarked possibilities to figure it out. The following benchmark 
 compares three versions of extracting the text from the node named `volume`.
 Especially the first two seemed very similar to me and it was not at all 
@@ -283,7 +286,7 @@ up. What is the reason for this big difference?
 I'd guess that `fun2` is fastest since it only calls two functions, and not 
 four, and because `xml_text()` probably converts the content directly to 
 character in C++, which is faster than calling `as.character` afterwards. Still, 
-I am not a computer scientist, so I am not so very sure.
+I am not a computer scientist, so I am not entirely sure about that.
 
 
 After rewriting and expanding the functionality, I was still not happy, however,
@@ -293,10 +296,8 @@ I dug deeper again, using the package
 enough, I had introduced a bottleneck right at the beginning: I was using
 `data_frame` (which is equivalent to `tibble()`) to create the object my 
 function would return. Unfortunately, `tibble` (and `data.frame` as well) are
-quite complex functions. They do type
-checking and other things, and if you do this repeatedly, it quickly adds up. 
-In my case it is not very smart, since I know exactly what kind of data to expect
-(if I wrote the rest of my functions appropriately).
+quite complex functions. They do type checking and other things, and if you do
+this repeatedly, it quickly adds up. 
 
 You can see the difference yourself:
 
@@ -429,7 +430,8 @@ parts,
 I was able to trim down execution time considerably overall. For 25,000 files,
 which is the maximum amount of files you can receive at one time through the
 standard interface of JSTOR/DfR, execution time is slightly under 4 minutes, or
-2 minutes if executed in parallel, at least on my moderately fast MacBook Pro.
+2 minutes if executed in parallel (at least on my machine with a 2,8GHz Intel 
+i5).
 
 
 # Lessons learned
